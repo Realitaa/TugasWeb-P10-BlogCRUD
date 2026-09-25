@@ -39,8 +39,10 @@ class PostSeeder extends Seeder
                 $width = 800;
                 $url = "https://picsum.photos/id/{$randomNumber}/{$width}.jpg";
 
-                $fileName = "picsum_{$randomNumber}_".Str::random(6).'.jpg';
-                $filePath = "media/{$fileName}";
+                $uuid = (string) Str::uuid();
+                $storedFileName = "{$uuid}.jpg";
+                $filePath = "media/{$storedFileName}";
+                $originalName = "picsum_{$randomNumber}_{$width}.jpg";
 
                 try {
                     $response = Http::timeout(8)->retry(2, 200)->get($url);
@@ -59,7 +61,7 @@ class PostSeeder extends Seeder
                 Media::create([
                     'post_id' => $post->id,
                     'file_path' => $filePath,
-                    'file_name' => $fileName,
+                    'file_name' => $originalName,
                     'mime_type' => 'image/jpeg',
                     'file_size' => strlen($imageContent),
                 ]);

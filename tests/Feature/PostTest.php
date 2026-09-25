@@ -113,3 +113,33 @@ test('can soft delete a post and keep media in database', function () {
     $this->assertSoftDeleted('posts', ['id' => $post->id]);
     $this->assertDatabaseHas('media', ['id' => $media->id]);
 });
+
+test('uploading files with identical names stores them with unique uuid filenames and preserves original name', function () {
+    Storage::fake('public');
+
+    $response = $this->post(route('posts.store'), [
+        'title' => 'Post Media Duplikat Nama',
+        'body' => 'Konten postingan untuk pengujian duplikasi nama file media.',
+        'media' => [
+            UploadedFile::fake()->image('foto.jpg', 600, 400)->size(200),
+            UploadedFile::fake()->image('foto.jpg', 600, 400)->size(200),
+        ],
+    ]);
+
+    $response->assertRedirect(route('posts.index'));
+
+    $post = Post::where('title', 'Post Media Duplikat Nama')->first();
+    expect($post->media)->toHaveCount(2);
+
+    $media1 = $post->media[0];
+    $media2 = $post->media[1];
+
+    // Kedua file tetap menyimpan nama asli yang sama di database
+    expect($media1->file_name)->toBe('foto.jpg')
+        ->and($media2->file_name)->toBe('foto.jpg');
+
+    // Namun nama file fisik di storage menggunakan UUID yang berbeda sehingga tidak menimpa
+    expect($media1->file_path)->not->toBe($media2->file_path);
+    Storage::disk('public')->assertExists($media1->file_path);
+    Storage::disk('public')->assertExists($media2->file_path);
+});

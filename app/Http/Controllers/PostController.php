@@ -71,7 +71,10 @@ class PostController extends Controller
 
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
-                $path = $file->store('media', 'public');
+                $extension = $file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg';
+                $storedFileName = (string) Str::uuid().'.'.strtolower($extension);
+                $path = $file->storeAs('media', $storedFileName, 'public');
+
                 $post->media()->create([
                     'file_path' => $path,
                     'file_name' => $file->getClientOriginalName(),
@@ -157,7 +160,10 @@ class PostController extends Controller
 
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
-                $path = $file->store('media', 'public');
+                $extension = $file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg';
+                $storedFileName = (string) Str::uuid().'.'.strtolower($extension);
+                $path = $file->storeAs('media', $storedFileName, 'public');
+
                 $post->media()->create([
                     'file_path' => $path,
                     'file_name' => $file->getClientOriginalName(),
