@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  pest-tests:
+    name: Pest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: mbstring, dom, fileinfo, sqlite3, pdo_sqlite, pdo_mysql
+          coverage: none
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@v2
+        with:
+          version: 11.24.0
+          runtime: node@24
+          cache: true
+        env:
+          pnpm_config_minimum_release_age: 0
+
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Install Composer Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Install pnpm Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Frontend Assets
+        run: pnpm run build
+
+      - name: Generate Application Key
+        run: php artisan key:generate
+
+      - name: Execute Tests via Pest
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+        run: ./vendor/bin/pest --colors=always
