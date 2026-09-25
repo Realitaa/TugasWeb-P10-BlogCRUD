@@ -8,8 +8,8 @@
             <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                 Buat Postingan Baru
             </h1>
-            <a href="{{ route('posts.index') }}" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
-                &larr; Kembali
+            <a href="{{ route('posts.index') }}" class="inline-flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                <x-bladewind.icon name="arrow-left" class="size-4 mr-1 stroke-2 inline-block" /> Kembali
             </a>
         </div>
 

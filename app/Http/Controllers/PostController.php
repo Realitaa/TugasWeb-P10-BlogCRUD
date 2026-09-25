@@ -16,7 +16,8 @@ class PostController extends Controller
      */
     public function index(Request $request): View
     {
-        $posts = Post::with('media')
+        $posts = Post::withTrashed()
+            ->with('media')
             ->when($request->query('search'), function ($query, string $search): void {
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('body', 'like', "%{$search}%");

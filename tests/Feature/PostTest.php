@@ -193,3 +193,38 @@ test('edit page renders post form', function () {
     $response->assertSee('Edit Postingan');
     $response->assertSee($post->title);
 });
+
+test('soft deleted post is displayed on index with deleted message instead of content', function () {
+    $post = Post::factory()->create([
+        'title' => 'Judul Postingan Terhapus',
+        'body' => 'Badan konten postingan rahasia yang terhapus.',
+    ]);
+    $media = Media::factory()->create(['post_id' => $post->id, 'file_name' => 'gambar_terhapus.jpg']);
+
+    $post->delete();
+
+    $response = $this->get(route('posts.index'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Postingan ini telah dihapus.');
+    $response->assertDontSee('Judul Postingan Terhapus');
+    $response->assertDontSee('Badan konten postingan rahasia yang terhapus.');
+    $response->assertDontSee('gambar_terhapus.jpg');
+    $response->assertDontSee('Edit Post');
+});
+
+test('soft deleted post on show page displays deleted message instead of content', function () {
+    $post = Post::factory()->create([
+        'title' => 'Judul Postingan Terhapus Show',
+        'body' => 'Badan konten show yang terhapus.',
+    ]);
+    $post->delete();
+
+    $response = $this->get(route('posts.show', $post));
+
+    $response->assertStatus(200);
+    $response->assertSee('Postingan ini telah dihapus.');
+    $response->assertDontSee('Judul Postingan Terhapus Show');
+    $response->assertDontSee('Badan konten show yang terhapus.');
+    $response->assertDontSee('Edit Post');
+});

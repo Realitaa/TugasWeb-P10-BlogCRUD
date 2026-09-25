@@ -35,17 +35,17 @@
 
     @if($arrows)
         <button type="button" data-prev aria-label="Previous slide"
-                class="absolute top-1/2 left-2 -translate-y-1/2 grid place-items-center size-8 rounded-full bg-black/40 text-white hover:bg-black/60">
+                class="absolute top-1/2 left-2 -translate-y-1/2 grid place-items-center size-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
             <x-bladewind::icon name="chevron-left" class="size-5"/>
         </button>
         <button type="button" data-next aria-label="Next slide"
-                class="absolute top-1/2 right-2 -translate-y-1/2 grid place-items-center size-8 rounded-full bg-black/40 text-white hover:bg-black/60">
+                class="absolute top-1/2 right-2 -translate-y-1/2 grid place-items-center size-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
             <x-bladewind::icon name="chevron-right" class="size-5"/>
         </button>
     @endif
 
     @if($indicators)
-        <div data-indicators class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2"></div>
+        <div data-indicators class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10"></div>
     @endif
 </div>
 
@@ -54,16 +54,28 @@
 @endonce
 <x-bladewind::script :nonce="$nonce">
     (() => {
-        const root = document.querySelector('[data-bw-carousel="{{ $id }}"]');
-        if (root && root.dataset.bwInitialised === 'true') return;
-        if (root) root.dataset.bwInitialised = 'true';
+        const init = () => {
+            const root = document.querySelector('[data-bw-carousel="{{ $id }}"]');
+            if (!root || root.dataset.bwInitialised === 'true') return;
+            if (typeof BladewindCarousel === 'undefined') {
+                setTimeout(init, 50);
+                return;
+            }
+            root.dataset.bwInitialised = 'true';
 
-        new BladewindCarousel('{{ $id }}', {
-            loop: {{ $loop ? 'true' : 'false' }},
-            swipe: {{ $swipe ? 'true' : 'false' }},
-            autoplay: {{ $autoplay ? 'true' : 'false' }},
-            interval: {{ (int) $interval }},
-            indicators: {{ $indicators ? 'true' : 'false' }},
-        });
+            new BladewindCarousel('{{ $id }}', {
+                loop: {{ $loop ? 'true' : 'false' }},
+                swipe: {{ $swipe ? 'true' : 'false' }},
+                autoplay: {{ $autoplay ? 'true' : 'false' }},
+                interval: {{ (int) $interval }},
+                indicators: {{ $indicators ? 'true' : 'false' }},
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     })();
 </x-bladewind::script>
