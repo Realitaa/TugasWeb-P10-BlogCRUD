@@ -228,3 +228,43 @@ test('soft deleted post on show page displays deleted message instead of content
     $response->assertDontSee('Badan konten show yang terhapus.');
     $response->assertDontSee('Edit Post');
 });
+
+test('posts search returns matching posts by title or body with truncated body and show url', function () {
+    $post1 = Post::factory()->create([
+        'title' => 'Tutorial Belajar Laravel 12',
+        'body' => 'Panduan lengkap mempelajari framework Laravel versi terbaru dengan fitur-fitur canggih.',
+    ]);
+    $post2 = Post::factory()->create([
+        'title' => 'Tips Produktivitas Coding',
+        'body' => 'Cara meningkatkan fokus saat menulis kode PHP dan JavaScript sehari-hari.',
+    ]);
+    $deletedPost = Post::factory()->create([
+        'title' => 'Post Terhapus tentang Laravel',
+        'body' => 'Konten yang sudah di-soft-delete.',
+    ]);
+    $deletedPost->delete();
+
+    // Search by title
+    $responseTitle = $this->getJson(route('posts.search', ['q' => 'Laravel']));
+    $responseTitle->assertOk()
+        ->assertJsonCount(1)
+        ->assertJsonFragment([
+            'id' => $post1->id,
+            'title' => 'Tutorial Belajar Laravel 12',
+            'url' => route('posts.show', $post1),
+        ]);
+
+    // Search by body
+    $responseBody = $this->getJson(route('posts.search', ['q' => 'JavaScript']));
+    $responseBody->assertOk()
+        ->assertJsonCount(1)
+        ->assertJsonFragment([
+            'id' => $post2->id,
+            'title' => 'Tips Produktivitas Coding',
+            'url' => route('posts.show', $post2),
+        ]);
+
+    // Empty query returns empty array
+    $responseEmpty = $this->getJson(route('posts.search', ['q' => '']));
+    $responseEmpty->assertOk()->assertExactJson([]);
+});

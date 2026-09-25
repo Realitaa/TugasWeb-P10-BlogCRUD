@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,6 +28,36 @@ class PostController extends Controller
             ->withQueryString();
 
         return view('posts.index', compact('posts'));
+    }
+
+    /**
+     * Search posts by title and body for command palette.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->query('q', ''));
+
+        if ($query === '') {
+            return response()->json([]);
+        }
+
+        $posts = Post::query()
+            ->select(['id', 'title', 'body'])
+            ->where(function ($builder) use ($query): void {
+                $builder->where('title', 'like', "%{$query}%")
+                    ->orWhere('body', 'like', "%{$query}%");
+            })
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn (Post $post): array => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'body' => Str::limit(trim((string) preg_replace('/\s+/', ' ', strip_tags($post->body))), 140),
+                'url' => route('posts.show', $post),
+            ]);
+
+        return response()->json($posts);
     }
 
     /**

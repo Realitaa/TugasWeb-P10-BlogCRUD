@@ -76,9 +76,9 @@
         </div>
         <footer class="bw-command-palette-footer">
             <div class="bw-command-palette-hints">
-                <span class="bw-command-palette-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</span>
-                <span class="bw-command-palette-hint"><kbd>&crarr;</kbd> Select</span>
-                <span class="bw-command-palette-hint"><kbd>Esc</kbd> Close</span>
+                <span class="bw-command-palette-hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigasi</span>
+                <span class="bw-command-palette-hint"><kbd>&crarr;</kbd> Pilih</span>
+                <span class="bw-command-palette-hint"><kbd>Esc</kbd> Tutup</span>
             </div>
             @isset($footer)<div class="bw-command-palette-footer-content">{{ $footer }}</div>@endisset
         </footer>

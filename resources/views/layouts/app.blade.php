@@ -44,6 +44,11 @@
                 BlogPost
             </a>
             <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" onclick="openCommandPalette('post-search-palette')"
+                    class="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-dark-300 dark:hover:text-dark-100 dark:hover:bg-dark-700 transition cursor-pointer"
+                    title="Cari Postingan (Ctrl+K)" aria-label="Cari Postingan">
+                    <x-bladewind.icon name="magnifying-glass" class="size-5!" />
+                </button>
                 <x-bladewind.theme-switcher light_text="Terang" dark_text="Gelap" system_text="Sistem" />
                 <a href="https://github.com/Realitaa" target="_blank" rel="noopener noreferrer"
                     class="flex items-center gap-2 hover:opacity-85 transition" title="Profil GitHub Realitaa">
@@ -73,6 +78,16 @@
 
         @yield('content')
     </main>
+
+    <!-- Search Command Palette -->
+    <x-bladewind.command-palette name="post-search-palette" label="Cari Postingan"
+        placeholder="Ketik untuk mencari judul atau isi postingan..." search_label="Cari Postingan"
+        empty_text="Tidak ada postingan ditemukan." empty_description="Coba gunakan kata kunci pencarian yang lain."
+        loading_text="Mencari postingan..." close_label="Tutup pencarian" shortcut="mod+k">
+        <x-bladewind.command-palette.group name="posts" label="Postingan">
+            <!-- Dynamic search results populated by JavaScript -->
+        </x-bladewind.command-palette.group>
+    </x-bladewind.command-palette>
 
     @stack('scripts')
 </body>
