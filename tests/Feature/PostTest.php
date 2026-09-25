@@ -143,3 +143,53 @@ test('uploading files with identical names stores them with unique uuid filename
     Storage::disk('public')->assertExists($media1->file_path);
     Storage::disk('public')->assertExists($media2->file_path);
 });
+
+test('index renders successfully with posts and pagination', function () {
+    Post::factory()->count(7)->create();
+
+    $response = $this->get(route('posts.index'));
+
+    $response->assertStatus(200);
+    $response->assertViewIs('posts.index');
+    $response->assertViewHas('posts');
+    $response->assertSee('BlogPost');
+    $response->assertSee('Apa yang Anda pikirkan hari ini?');
+});
+
+test('index renders empty state when no posts exist', function () {
+    $response = $this->get(route('posts.index'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Belum Ada Postingan');
+});
+
+test('create page renders successfully', function () {
+    $response = $this->get(route('posts.create'));
+
+    $response->assertStatus(200);
+    $response->assertViewIs('posts.create');
+    $response->assertSee('Buat Postingan Baru');
+});
+
+test('show page renders post with media', function () {
+    $post = Post::factory()->create();
+    $media = Media::factory()->create(['post_id' => $post->id]);
+
+    $response = $this->get(route('posts.show', $post));
+
+    $response->assertStatus(200);
+    $response->assertViewIs('posts.show');
+    $response->assertSee($post->title);
+    $response->assertSee($media->file_name);
+});
+
+test('edit page renders post form', function () {
+    $post = Post::factory()->create();
+
+    $response = $this->get(route('posts.edit', $post));
+
+    $response->assertStatus(200);
+    $response->assertViewIs('posts.edit');
+    $response->assertSee('Edit Postingan');
+    $response->assertSee($post->title);
+});

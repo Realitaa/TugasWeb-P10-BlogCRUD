@@ -22,7 +22,7 @@ class PostController extends Controller
                     ->orWhere('body', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         return view('posts.index', compact('posts'));
